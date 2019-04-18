@@ -60,4 +60,12 @@
 `/movies/`: 有可能存在的影片文件。
 
 
+## External Links
+
+yanfly团队的免费插件：https://yanfly.moe
+
+rpgmakerforum：https://forums.rpgmakerweb.com
+
 ### 一起努力鸭！
+
+### 如果没有Git使用经验并且要进行不确定的操作时，请先联系水鱼（2300756578）或鸦（504949105）
