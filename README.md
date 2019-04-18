@@ -62,7 +62,7 @@
 
 ## External Links
 
-yanfly团队的免费插件：https://yanfly.moe
+yanfly团队的免费插件：http://yanfly.moe
 
 rpgmakerforum：https://forums.rpgmakerweb.com
 
