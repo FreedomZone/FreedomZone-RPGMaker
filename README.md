@@ -62,6 +62,8 @@
 
 ## External Links
 
+RPG Maker MV汉化文档：http://help.rpgmakermv.cn 
+
 yanfly团队的免费插件：http://yanfly.moe
 
 rpgmakerforum：https://forums.rpgmakerweb.com
