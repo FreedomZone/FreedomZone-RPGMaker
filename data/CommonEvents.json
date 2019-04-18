@@ -1,7 +1,7 @@
 [
 null,
-{"id":1,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0},
-{"id":2,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0},
-{"id":3,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0},
+{"id":1,"list":[{"code":250,"indent":0,"parameters":[{"name":"Item3","volume":90,"pitch":100,"pan":0}]},{"code":356,"indent":0,"parameters":["ClearGab"]},{"code":356,"indent":0,"parameters":["GabActor 0"]},{"code":356,"indent":0,"parameters":["GabText 获得了\\ii[\\v[1]]！"]},{"code":356,"indent":0,"parameters":["ShowGab"]},{"code":0,"indent":0,"parameters":[]}],"name":"获得物品","switchId":1,"trigger":0},
+{"id":2,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"获得武器","switchId":1,"trigger":0},
+{"id":3,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"获得护甲","switchId":1,"trigger":0},
 {"id":4,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0}
 ]
