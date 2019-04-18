@@ -28,6 +28,7 @@
 /icon/
 /img/
 /movies/
+/save/
 ```
 
 ### Files & Directory
@@ -58,6 +59,8 @@
 `/img/`: 所有的图片资源文件，包括人物立绘、地图背景、动画等等。
 
 `/movies/`: 有可能存在的影片文件。
+
+`/save/`: 存档文件。
 
 
 ## External Links
