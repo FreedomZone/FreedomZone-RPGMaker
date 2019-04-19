@@ -18,6 +18,13 @@
 > 3. 打开Game.rpgproject，为电子浮泽世界出一份力吧！
 
 
+## Pushing Rules
+
+为了避免麻烦/降低操作难度，此项目暂时不会使用Pull Requests和分支（不排除将来有使用的可能）
+> 1. 开始肝锅时请先Fetch并Pull最新的更新
+> 2. 添加资源文件时请告知@水鱼
+> 3. 提交时（特别是提交重大更新时），请写明Commit Message
+
 ## GitIgnore & Files Info
 
 ### .gitignore
