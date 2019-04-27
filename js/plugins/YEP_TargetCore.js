@@ -443,6 +443,12 @@ DataManager.makeTargetTypes = function(obj, type) {
     } else if (type.match(/ALLY ROW/i)) {
       if (!Imported.YEP_RowFormation) return;
       obj.scope = 'ALLY ROW';
+    } else if (type.match(/ENEMY COLUMN/i)) {
+      if (!Imported.YEP_RowFormation) return;
+      obj.scope = 'ENEMY COLUMN';
+    } else if (type.match(/ALLY COLUMN/i)) {
+      if (!Imported.YEP_RowFormation) return;
+      obj.scope = 'ALLY COLUMN';
     }
 };
 
@@ -497,7 +503,10 @@ if (Imported.YEP_BattleEngineCore) {
 Yanfly.Target.BattleManager_startAllSelection = BattleManager.startAllSelection;
 BattleManager.startAllSelection = function() {
   var action = this.inputtingAction();
-  if (action.isForMultiple()) {
+  if (action.isForAll()) {
+    var targets = this.inputtingAction().makeAllTypeTargets();
+    this._customTargetSelectGroup = targets;
+  } else if (action.isForMultiple()) {
     var targets = this.inputtingAction().makeMultipleOfTargets();
     this._customTargetSelectGroup = targets;
   } else if (action.isForRow()) { 
@@ -559,6 +568,7 @@ Game_Action.prototype.isForOpponent = function() {
       if (this.item().multipleOf.contains('OPPONENTS')) return true;
     }
     if (this.item().scope === 'ENEMY ROW') return true;
+    if (this.item().scope === 'ENEMY COLUMN') return true;
     if (this.item().scope === 'FRONT ENEMY ROW') return true;
     if (this.item().scope === 'BACK ENEMY ROW') return true;
     if (this.item().scope === 'SPECIFIC ENEMY ROW') return true;
@@ -576,6 +586,7 @@ Game_Action.prototype.isForFriend = function() {
       if (this.item().multipleOf.contains('FRIENDS')) return true;
     }
     if (this.item().scope === 'ALLY ROW') return true;
+    if (this.item().scope === 'ALLY COLUMN') return true;
     if (this.item().scope === 'FRONT ALLY ROW') return true;
     if (this.item().scope === 'BACK ALLY ROW') return true;
     if (this.item().scope === 'SPECIFIC ALLY ROW') return true;
@@ -636,9 +647,18 @@ Game_Action.prototype.isForMultiple = function() {
     return this.item().scope === 'MULTIPLE';
 };
 
+Game_Action.prototype.isForAll = function() {
+    if (this.item().scope === 'TARGET ALL FOES') return true;
+    if (this.item().scope === 'TARGET ALL ALLIES') return true;
+    return false;
+
+}
+
 Game_Action.prototype.isForRow = function() {
     if (this.item().scope === 'ENEMY ROW') return true;
     if (this.item().scope === 'ALLY ROW') return true;
+    if (this.item().scope === 'ENEMY COLUMN') return true;
+    if (this.item().scope === 'ALLY COLUMN') return true;
     if (this.item().scope === 'FRONT ENEMY ROW') return true;
     if (this.item().scope === 'FRONT ALLY ROW') return true;
     if (this.item().scope === 'BACK ENEMY ROW') return true;
@@ -657,6 +677,8 @@ Game_Action.prototype.needsSelection = function() {
     if (this.item().scope === 'TARGET RANDOM ALLIES') return true;
     if (this.item().scope === 'ENEMY ROW') return true;
     if (this.item().scope === 'ALLY ROW') return true;
+    if (this.item().scope === 'ENEMY COLUMN') return true;
+    if (this.item().scope === 'ALLY COLUMN') return true;
     if (this.item().scope === 'BLOCK') return true;
     return Yanfly.Target.Game_Action_needsSelection.call(this);
 };
@@ -747,6 +769,8 @@ Game_Action.prototype.makeEvalTargets = function() {
   }
   var b = targetUnit.smoothTarget(this._targetIndex);
   var target = targetUnit.smoothTarget(this._targetIndex);
+  var row = target.row();
+  var col = target.column();
   var s = $gameSwitches._data;
   var v = $gameVariables._data;
   var allies = this.friendsUnit();
@@ -761,6 +785,7 @@ Game_Action.prototype.makeEvalTargets = function() {
   }
   return targets;
 };
+
 
 Game_Action.prototype.getRandomTargets = function(number, unit) {
   var targets = [];
@@ -800,6 +825,26 @@ Game_Action.prototype.makeMultipleOfTargets = function() {
     return targets;
 };
 
+
+Game_Action.prototype.makeAllTypeTargets = function() {
+  var scope = this.item().scope;
+  if (scope == 'TARGET ALL FOES') {
+    for (let block of $gameSystem._blockSprite._enemy) {
+      block.update();
+      block.selected = true;
+      block.needUpdate = true;
+    }
+    return this.opponentsUnit().aliveMembers();
+  } else if (scope == 'TARGET ALL ALLIES') {
+    for (let block of $gameSystem._blockSprite._ally) {
+      block.update();
+      block.selected = true;
+      block.needUpdate = true;
+    }
+    return this.friendsUnit().aliveMembers();
+  }
+}
+
 Game_Action.prototype.makeRowTypeTargets = function() {
     var targets = [];
     var scope = this.item().scope;
@@ -809,17 +854,61 @@ Game_Action.prototype.makeRowTypeTargets = function() {
       var row = target.row();
       var column = target.column();
       targets = unit.positionAliveMembers(row, column);
-    }
-    else if (scope === 'ENEMY ROW') {
+      for (let block of $gameSystem._blockSprite._enemy) {
+        block.update();
+        if (block.row() == row && block.column() == column) {
+          block.selected = true;
+        }
+        block.needUpdate = true;
+      }
+    } else if (scope === 'ENEMY ROW') {
       var unit = this.opponentsUnit();
       var target = unit.smoothTarget(this._targetIndex);
       var row = target.row();
       targets = unit.rowAliveMembers(row);
+      for (let block of $gameSystem._blockSprite._enemy) {
+        block.update();
+        if (block.row() == row) {
+          block.selected = true;
+        }
+        block.needUpdate = true;
+      }
     } else if (scope === 'ALLY ROW') {
       var unit = this.friendsUnit();
       var target = unit.smoothTarget(this._targetIndex);
       var row = target.row();
       targets = unit.rowAliveMembers(row);
+      for (let block of $gameSystem._blockSprite._ally) {
+        block.update();
+        if (block.row() == row) {
+          block.selected = true;
+        }
+        block.needUpdate = true;
+      }
+    }else if (scope === 'ENEMY COLUMN') {
+      var unit = this.opponentsUnit();
+      var target = unit.smoothTarget(this._targetIndex);
+      var col = target.column();
+      targets = unit.columnAliveMembers(col);
+      for (let block of $gameSystem._blockSprite._enemy) {
+        block.update();
+        if (block.column() == col) {
+          block.selected = true;
+        }
+        block.needUpdate = true;
+      }
+    } else if (scope === 'ALLY COLUMN') {
+      var unit = this.friendsUnit();
+      var target = unit.smoothTarget(this._targetIndex);
+      var col = target.column();
+      targets = unit.columnAliveMembers(col);
+      for (let block of $gameSystem._blockSprite._ally) {
+        block.update();
+        if (block.column() == col) {
+          block.selected = true;
+        }
+        block.needUpdate = true;
+      }
     } else if (scope === 'FRONT ENEMY ROW') {
       var unit = this.opponentsUnit();
       for (var i = 1; i < Yanfly.Param.RowMaximum + 1; ++i) {
@@ -871,6 +960,7 @@ Window_Help.prototype.specialSelectionText = function(action) {
     if (!action) return false;
     if (action.item().customTargetText !== '') return true;
     if (action.isForRow()) return true;
+    if (action.isForAll()) return true;
     return Yanfly.Target.Window_Help_specialSelectionText.call(this, action);
 };
 
@@ -883,6 +973,17 @@ Window_Help.prototype.drawSpecialSelectionText = function(action) {
     var wy = (this.contents.height - this.lineHeight()) / 2;
     var text = this.makeCustomTargetText(action);
     this.drawText(text, wx, wy, this.contents.width, 'center');
+  } else if (action.isForAll()) {
+    BattleManager.startAllSelection();
+    if (action.item().scope == 'TARGET ALL FOES') {
+      var wx = 0;
+      var wy = (this.contents.height - this.lineHeight()) / 2;
+      this.drawText('敌方全体', wx, wy, this.contents.width, 'center');
+    } else if (action.item().scope == 'TARGET ALL ALLIES') {
+      var wx = 0;
+      var wy = (this.contents.height - this.lineHeight()) / 2;
+      this.drawText('我方全体', wx, wy, this.contents.width, 'center');
+    }
   } else if (action.isForMultiple()) {
     BattleManager.startAllSelection();
     var wx = 0;
@@ -928,7 +1029,9 @@ Window_Help.prototype.makeCustomTargetText = function(action) {
     var a = user;
     var subject = user;
     var b = user;
-    var target = user;
+    var target = this._battler;
+    var row = target.row();
+    var col = target.column();
     var code = action.item().customTargetText;
     try {
       eval(code);
@@ -1022,24 +1125,40 @@ Yanfly.Target.Scene_Battle_onEnemyOk = Scene_Battle.prototype.onEnemyOk;
 Scene_Battle.prototype.onEnemyOk = function() {
     BattleManager.clearCustomTargetSelectGroup();
     Yanfly.Target.Scene_Battle_onEnemyOk.call(this);
+    for (let block of $gameSystem._blockSprite._enemy) {
+      block.selected = false;
+      block.needUpdate = true;
+    }
 };
 
 Yanfly.Target.Scene_Battle_onEnemyCancel = Scene_Battle.prototype.onEnemyCancel;
 Scene_Battle.prototype.onEnemyCancel = function() {
     BattleManager.clearCustomTargetSelectGroup();
     Yanfly.Target.Scene_Battle_onEnemyCancel.call(this);
+    for (let block of $gameSystem._blockSprite._enemy) {
+      block.selected = false;
+      block.needUpdate = true;
+    }
 };
 
 Yanfly.Target.Scene_Battle_onActorOk = Scene_Battle.prototype.onActorOk;
 Scene_Battle.prototype.onActorOk = function() {
     BattleManager.clearCustomTargetSelectGroup();
     Yanfly.Target.Scene_Battle_onActorOk.call(this);
+    for (let block of $gameSystem._blockSprite._ally) {
+      block.selected = false;
+      block.needUpdate = true;
+    }
 };
 
 Yanfly.Target.Scene_Battle_onActorCancel = Scene_Battle.prototype.onActorCancel;
 Scene_Battle.prototype.onActorCancel = function() {
     BattleManager.clearCustomTargetSelectGroup();
     Yanfly.Target.Scene_Battle_onActorCancel.call(this);
+    for (let block of $gameSystem._blockSprite._ally) {
+      block.selected = false;
+      block.needUpdate = true;
+    }
 };
 
 //=============================================================================
