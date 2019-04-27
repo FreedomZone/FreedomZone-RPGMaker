@@ -2974,7 +2974,7 @@ Sprite_Battler.prototype.startMove = function(x, y, duration) {
 };
 
 Sprite_Battler.prototype.stepForward = function() {
-    this.startMove(Yanfly.Param.BECStepDist, 0, 12);
+    this.startMove(Yanfly.Param.BECStepDist, 0, 6);
 };
 
 Sprite_Battler.prototype.stepBack = function() {
@@ -3142,7 +3142,7 @@ Sprite_Actor.prototype.onMoveEnd = function() {
 };
 
 Sprite_Actor.prototype.stepForward = function() {
-    this.startMove(-Yanfly.Param.BECStepDist, 0, 12);
+    this.startMove(-Yanfly.Param.BECStepDist, 0, 6);
 };
 
 Sprite_Actor.prototype.stepFlinch = function() {
