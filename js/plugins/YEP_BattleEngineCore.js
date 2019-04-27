@@ -2721,10 +2721,16 @@ BattleManager.actionAniWait = function(frames) {
     return false;
 };
 
+Game_Action.prototype.isEnemyAttack = function() {
+  if (this._item._itemId === 3) return true;
+  return false;
+};
+
 BattleManager.actionCastAnimation = function() {
   if (!$gameSystem.isSideView() && this._subject.isActor()) return true;
-  if (!this._action.isAttack() && !this._action.isGuard() &&
+  if (!this._action.isAttack() && !this._action.isGuard() && !this._action.isEnemyAttack() && 
   this._action.isSkill()) {
+    console.log(this._action);
     if (this._action.item().castAnimation > 0) {
       var ani = $dataAnimations[this._action.item().castAnimation]
       this._logWindow.showAnimation(this._subject, [this._subject],

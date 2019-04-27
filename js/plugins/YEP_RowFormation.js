@@ -1482,6 +1482,16 @@ Game_Battler.prototype.rowIndex = function() {
     return index;
 };
 
+Game_Battler.prototype.positionIndex = function() {
+  var group = this.friendsUnit();
+  if (Yanfly.Param.RowAliveRowIndex && group === $gameTroop) {
+    var index = group.positionAliveMembers(this.row(), this.column()).indexOf(this);
+  } else {
+    var index = group.positionMembers(this.row(), this.column()).indexOf(this);
+  }
+  return index;
+};
+
 Yanfly.Row.Game_Battler_isStateAddable = Game_Battler.prototype.isStateAddable;
 Game_Battler.prototype.isStateAddable = function(stateId) {
     if (this.isRowStateAffected(stateId)) return false;
@@ -1699,6 +1709,10 @@ Game_Unit.prototype.rowDeadSize = function(rowId) {
     return this.rowDeadMembers(rowId).length;
 };
 
+Game_Unit.prototype.positionSize = function(rowId) {
+  return this.positionMembers(rowId).length;
+}
+
 Game_Unit.prototype.rowMembers = function(rowId) {
     var group = [];
     var length = this.members().length;
@@ -1730,6 +1744,17 @@ Game_Unit.prototype.columnAliveMembers = function(columnId) {
       if (member._column === columnId) group.push(member);
     }
     return group;
+}
+
+Game_Unit.prototype.positionMembers = function(rowId, columnId) {
+  var group = [];
+  var length = this.members().length;
+  for (var i = 0; i < length; ++i) {
+    var member = this.members()[i];
+    if (!member) continue;
+    if (member.row() === rowId && member.column() === columnId) group.push(member);
+  }
+  return group;
 }
 
 Game_Unit.prototype.positionAliveMembers = function(rowId, columnId) {
@@ -1900,6 +1925,8 @@ Sprite_Actor.prototype.alterActorHome = function(index) {
     var rowSize = $gameParty.rowSize(rowId);
     var rowMembers = $gameParty.rowMembers(rowId);
     var rowIndex = this._actor.rowIndex();
+    var positionMembers = $gameParty.positionMembers(rowId, columnId);
+    var positionIndex = this._actor.positionIndex();
     if (Imported.YEP_BattleEngineCore) {
       var statusHeight = Yanfly.Param.BECCommandRows;
     } else {
@@ -1937,14 +1964,22 @@ Sprite_Actor.prototype.alterActorHome = function(index) {
     }
     var code = Yanfly.Row.HomeX[rowId];
     try {
-      var homeX = 700 + 80 * rowId;
+      var offsetX = 0;
+      if (positionMembers.length > 1) {
+        var offsetX = -20 + Math.floor(40 * positionIndex / (positionMembers.length - 1));
+      }
+      var homeX = 700 + 80 * rowId + offsetX;
     } catch (e) {
       var homeX = 0;
       Yanfly.Util.displayError(e, code, 'ROW FORMATION ACTOR HOME X ERROR');
     }
     var code = Yanfly.Row.HomeY[rowId];
     try {
-      var homeY = 80 + 80 * columnId;
+      var offsetY = 0;
+      if (positionMembers.length > 1) {
+        var offsetY = -10 + Math.floor(20 * positionIndex / (positionMembers.length - 1));
+      }
+      var homeY = 80 + 80 * columnId + offsetY;
     } catch (e) {
       var homeY = 0;
       Yanfly.Util.displayError(e, code, 'ROW FORMATION ACTOR HOME Y ERROR');
@@ -2094,6 +2129,8 @@ Sprite_Enemy.prototype.alterEnemyHome = function(index) {
     var rowSize = $gameTroop.rowSize(rowId);
     var rowMembers = $gameTroop.rowMembers(rowId);
     var rowIndex = this._enemy.rowIndex();
+    var positionMembers = $gameTroop.positionMembers(rowId, columnId);
+    var positionIndex = this._enemy.positionIndex();
     if (Imported.YEP_BattleEngineCore) {
       var statusHeight = Yanfly.Param.BECCommandRows;
     } else {
@@ -2133,14 +2170,22 @@ Sprite_Enemy.prototype.alterEnemyHome = function(index) {
     var screenY = this._enemy.screenY();
     var code = Yanfly.Param.RowEnemyX;
     try {
-      var homeX = 1280 - (700 + 80 * rowId);
+      var offsetX = 0;
+      if (positionMembers.length > 1) {
+        var offsetX = -20 + Math.floor(40 * positionIndex / (positionMembers.length - 1));
+      }
+      var homeX = 1280 - (700 + 80 * rowId + offsetX);
     } catch (e) {
       var homeX = 0;
       Yanfly.Util.displayError(e, code, 'ROW FORMATION ENEMY HOME X ERROR');
     }
     var code = Yanfly.Param.RowEnemyY
     try {
-      var homeY = 80 + 80 * columnId;
+      var offsetY = 0;
+      if (positionMembers.length > 1) {
+        var offsetY = 10 + Math.floor(-20 * positionIndex / (positionMembers.length - 1));
+      }
+      var homeY = 80 + 80 * columnId + offsetY;
     } catch (e) {
       var homeY = 0;
       Yanfly.Util.displayError(e, code, 'ROW FORMATION ENEMY HOME Y ERROR');
