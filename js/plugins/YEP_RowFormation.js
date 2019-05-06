@@ -1005,6 +1005,7 @@ Yanfly.Param.RowEnBat = eval(Yanfly.Param.RowEnBat);
 Yanfly.Param.RowCooldown = Number(Yanfly.Parameters['Battle Cooldown']);
 
 Yanfly.Param.RowDefault = Number(Yanfly.Parameters['Default Row']);
+Yanfly.Param.ColumnDefault = Number(Yanfly.Parameters['Default Column']);
 Yanfly.Param.RowDefault = Yanfly.Param.RowDefault.clamp(1, 10);
 Yanfly.Param.RowEnemyLock = eval(String(Yanfly.Parameters['Enemy Row Lock']));
 
@@ -1089,8 +1090,8 @@ DataManager.processRowNotetags1 = function(group) {
     var obj = group[n];
     var notedata = obj.note.split(/[\r\n]+/);
 
-    obj.defaultRow = [Yanfly.Param.RowDefault];
-    obj.defaultColumn = [1];
+    obj.defaultRow = [3];
+    obj.defaultColumn = [3];
 
     for (var i = 0; i < notedata.length; i++) {
       var line = notedata[i];
