@@ -1928,6 +1928,7 @@ Sprite_Actor.prototype.alterActorHome = function(index) {
     var rowIndex = this._actor.rowIndex();
     var positionMembers = $gameParty.positionMembers(rowId, columnId);
     var positionIndex = this._actor.positionIndex();
+    var isBlock = this._actor.isBlock();
     if (Imported.YEP_BattleEngineCore) {
       var statusHeight = Yanfly.Param.BECCommandRows;
     } else {
@@ -1966,8 +1967,8 @@ Sprite_Actor.prototype.alterActorHome = function(index) {
     var code = Yanfly.Row.HomeX[rowId];
     try {
       var offsetX = 0;
-      if (positionMembers.length > 1) {
-        var offsetX = -20 + Math.floor(40 * positionIndex / (positionMembers.length - 1));
+      if (positionMembers.length > 2) {
+        var offsetX = -20 + Math.floor(40 * positionIndex / (positionMembers.length - 2));
       }
       var homeX = 700 + 80 * rowId + offsetX;
     } catch (e) {
@@ -1977,10 +1978,10 @@ Sprite_Actor.prototype.alterActorHome = function(index) {
     var code = Yanfly.Row.HomeY[rowId];
     try {
       var offsetY = 0;
-      if (positionMembers.length > 1) {
-        var offsetY = -10 + Math.floor(20 * positionIndex / (positionMembers.length - 1));
+      if (positionMembers.length > 2) {
+        var offsetY = -10 + Math.floor(20 * positionIndex / (positionMembers.length - 2));
       }
-      var homeY = 80 + 80 * columnId + offsetY;
+      var homeY = 80 + 80 * columnId + offsetY + (isBlock ? 40 : 0);
     } catch (e) {
       var homeY = 0;
       Yanfly.Util.displayError(e, code, 'ROW FORMATION ACTOR HOME Y ERROR');
@@ -2132,6 +2133,7 @@ Sprite_Enemy.prototype.alterEnemyHome = function(index) {
     var rowIndex = this._enemy.rowIndex();
     var positionMembers = $gameTroop.positionMembers(rowId, columnId);
     var positionIndex = this._enemy.positionIndex();
+    var isBlock = this._enemy.isBlock();
     if (Imported.YEP_BattleEngineCore) {
       var statusHeight = Yanfly.Param.BECCommandRows;
     } else {
@@ -2172,8 +2174,8 @@ Sprite_Enemy.prototype.alterEnemyHome = function(index) {
     var code = Yanfly.Param.RowEnemyX;
     try {
       var offsetX = 0;
-      if (positionMembers.length > 1) {
-        var offsetX = -20 + Math.floor(40 * positionIndex / (positionMembers.length - 1));
+      if (positionMembers.length > 2) {
+        var offsetX = -20 + Math.floor(40 * positionIndex / (positionMembers.length - 2));
       }
       var homeX = 1280 - (700 + 80 * rowId + offsetX);
     } catch (e) {
@@ -2183,10 +2185,10 @@ Sprite_Enemy.prototype.alterEnemyHome = function(index) {
     var code = Yanfly.Param.RowEnemyY
     try {
       var offsetY = 0;
-      if (positionMembers.length > 1) {
-        var offsetY = 10 + Math.floor(-20 * positionIndex / (positionMembers.length - 1));
+      if (positionMembers.length > 2) {
+        var offsetY = 10 + Math.floor(-20 * positionIndex / (positionMembers.length - 2));
       }
-      var homeY = 80 + 80 * columnId + offsetY;
+      var homeY = 80 + 80 * columnId + offsetY + (isBlock ? 40 : 0);
     } catch (e) {
       var homeY = 0;
       Yanfly.Util.displayError(e, code, 'ROW FORMATION ENEMY HOME Y ERROR');

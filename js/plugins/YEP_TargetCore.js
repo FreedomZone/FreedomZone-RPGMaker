@@ -392,8 +392,10 @@ DataManager.makeTargetTypes = function(obj, type) {
       this.makeTargetMultipleOfType(obj, targets, stat, number);
     } else if (type.match(/EVERYBODY/i)) {
       obj.scope = 'EVERYBODY';
-    } else if (type.match(/BLOCK/i)) {
-      obj.scope = 'BLOCK';
+    } else if (type.match(/ENEMY BLOCK/i)) {
+      obj.scope = 'ENEMY BLOCK';
+    } else if (type.match(/ALLY BLOCK/i)) {
+      obj.scope = 'ALLY BLOCK';
     } else if (type.match(/(\d+)[ ]RANDOM ANY/i)) {
       obj.randomTargets = parseInt(RegExp.$1);
       obj.scope = 'RANDOM ANY';
@@ -569,6 +571,7 @@ Game_Action.prototype.isForOpponent = function() {
     }
     if (this.item().scope === 'ENEMY ROW') return true;
     if (this.item().scope === 'ENEMY COLUMN') return true;
+    if (this.item().scope === 'ENEMY BLOCK') return true;
     if (this.item().scope === 'FRONT ENEMY ROW') return true;
     if (this.item().scope === 'BACK ENEMY ROW') return true;
     if (this.item().scope === 'SPECIFIC ENEMY ROW') return true;
@@ -585,6 +588,7 @@ Game_Action.prototype.isForFriend = function() {
     if (this.item().scope === 'MULTIPLE') {
       if (this.item().multipleOf.contains('FRIENDS')) return true;
     }
+    if (this.item().scope === 'ALLY BLOCK') return true;
     if (this.item().scope === 'ALLY ROW') return true;
     if (this.item().scope === 'ALLY COLUMN') return true;
     if (this.item().scope === 'FRONT ALLY ROW') return true;
@@ -665,7 +669,8 @@ Game_Action.prototype.isForRow = function() {
     if (this.item().scope === 'BACK ALLY ROW') return true;
     if (this.item().scope === 'SPECIFIC ENEMY ROW') return true;
     if (this.item().scope === 'SPECIFIC ALLY ROW') return true;
-    if (this.item().scope === 'BLOCK') return true;
+    if (this.item().scope === 'ENEMY BLOCK') return true;
+    if (this.item().scope === 'ALLY BLOCK') return true;
     return false;
 };
 
@@ -679,7 +684,8 @@ Game_Action.prototype.needsSelection = function() {
     if (this.item().scope === 'ALLY ROW') return true;
     if (this.item().scope === 'ENEMY COLUMN') return true;
     if (this.item().scope === 'ALLY COLUMN') return true;
-    if (this.item().scope === 'BLOCK') return true;
+    if (this.item().scope === 'ENEMY BLOCK') return true;
+    if (this.item().scope === 'ALLY BLOCK') return true;
     return Yanfly.Target.Game_Action_needsSelection.call(this);
 };
 
@@ -848,13 +854,26 @@ Game_Action.prototype.makeAllTypeTargets = function() {
 Game_Action.prototype.makeRowTypeTargets = function() {
     var targets = [];
     var scope = this.item().scope;
-    if (scope === 'BLOCK') {
+    if (scope === 'ENEMY BLOCK') {
       var unit = this.opponentsUnit();
       var target = unit.smoothTarget(this._targetIndex);
       var row = target.row();
       var column = target.column();
       targets = unit.positionAliveMembers(row, column);
       for (let block of $gameSystem._blockSprite._enemy) {
+        block.update();
+        if (block.row() == row && block.column() == column) {
+          block.selected = true;
+        }
+        block.needUpdate = true;
+      }
+    } else if (scope === 'ALLY BLOCK') {
+      var unit = this.friendsUnit();
+      var target = unit.smoothTarget(this._targetIndex);
+      var row = target.row();
+      var column = target.column();
+      targets = unit.positionAliveMembers(row, column);
+      for (let block of $gameSystem._blockSprite._ally) {
         block.update();
         if (block.row() == row && block.column() == column) {
           block.selected = true;
@@ -1077,7 +1096,30 @@ Window_Help.prototype.makeTargetRowText = function(action) {
     var scope = action.item().scope;
     if (scope === 'ENEMY ROW' || scope === 'ALLY ROW') {
       var fmt = Yanfly.Param.TargetHlpRowTx;
-      var text = fmt.format(this._battler.name());
+      var text = "第 " + this._battler.row() + " 行";
+    } else if (scope === 'ENEMY BLOCK') {
+      var array = [];
+      var row = this._battler.row();
+      var col = this._battler.column();
+      for (let enemy of $gameTroop.aliveMembers()) {
+        if (enemy.row() === row && enemy.column() === col && !enemy.isBlock()) {
+          array.push(enemy.name());
+        }
+      }
+      var text = array.join(" & ")
+    } else if (scope === 'ALLY BLOCK') {
+      var array = [];
+      var row = this._battler.row();
+      var col = this._battler.column();
+      for (let ally of $gameParty.aliveMembers()) {
+        if (ally.row() === row && ally.column() === col && !ally.isBlock()) {
+          array.push(ally.name());
+        }
+      }
+      var text = array.join(" & ")
+    } else if (scope === 'ENEMY COLUMN' || scope === 'ALLY COLUMN') {
+      var fmt = Yanfly.Param.TargetHlpRowTx;
+      var text = "第 " + this._battler.column() + " 列";
     } else if (scope === 'FRONT ENEMY ROW') {
       var fmt = Yanfly.Param.TargetFrontRow;
       var text = fmt.format(Yanfly.Param.TargetRowEnemies);
