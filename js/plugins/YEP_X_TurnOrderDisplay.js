@@ -727,6 +727,7 @@ Game_Temp.prototype.makeBattleTurnOrderData = function() {
 Game_Temp.prototype.battleTurnOrderAddSubject = function() {
   if (!BattleManager._subject) return;
   if (BattleManager._subject.isDead()) return;
+  if (BattleManager._subject.isBlock()) return;
   if (BattleManager._surprise && BattleManager._subject.isActor()) return;
   this._battleTurnOrder.push(BattleManager._subject);
 };
@@ -999,7 +1000,9 @@ Window_TurnOrderIcon.prototype.updateDestinationX = function() {
 
 Window_TurnOrderIcon.prototype.aliveMembersSize = function() {
   var value = 0;
-  var members = $gameParty.battleMembers().concat($gameTroop.nonBlockMembers());
+  var members = $gameParty.battleMembers().filter(function(member) {
+    return !member.isBlock();
+  }).concat($gameTroop.nonBlockMembers());
   var length = members.length;
   for (var i = 0; i < length; ++i) {
     var member = members[i];

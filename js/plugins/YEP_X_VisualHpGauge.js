@@ -386,6 +386,7 @@ Game_Battler.prototype.hpGaugeColor2 = function() {
 
 Game_Actor.prototype.hpGaugeVisible = function() {
     if (this.isHidden()) return false;
+    if (this.isBlock()) return false;
 		if (this.currentClass().showHpGauge) return true;
 		if (!eval(Yanfly.Param.VHGDisplayActor)) return false;
 		if (this.currentClass().hideHpGauge) return false;
@@ -424,6 +425,7 @@ Game_Actor.prototype.hpGaugeColor2 = function() {
 
 Game_Enemy.prototype.hpGaugeVisible = function() {
     if (this.isHidden()) return false;
+    if (this.isBlock()) return false;
 		if (this.enemy().hideHpGauge) return false;
     if (BattleManager.isBattleTest()) return true;
 		if (this.enemy().showHpGauge) return true;
