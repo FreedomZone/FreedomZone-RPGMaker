@@ -425,7 +425,7 @@ BattleManager.setTurnOrderDisplaySurprisePreemptiveDefault = function() {
   } else if (this._preemptive) {
     var change = true;
     this._performedBattlers = 
-      this._performedBattlers.concat($gameTroop.members());
+      this._performedBattlers.concat($gameTroop.nonBlockMembers());
   }
 };
 
@@ -616,7 +616,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 Scene_Battle.prototype.createTurnOrderDisplay = function() {
   this._turnOrderDisplay = [];
-  var length = $gameTroop.members().length;
+  var length = $gameTroop.nonBlockMembers().length;
   for (var i = 0; i < length; ++i) {
     this._turnOrderDisplay.push(new Window_TurnOrderIcon($gameTroop, i));
   }
@@ -727,6 +727,7 @@ Game_Temp.prototype.makeBattleTurnOrderData = function() {
 Game_Temp.prototype.battleTurnOrderAddSubject = function() {
   if (!BattleManager._subject) return;
   if (BattleManager._subject.isDead()) return;
+  if (BattleManager._subject.isBlock()) return;
   if (BattleManager._surprise && BattleManager._subject.isActor()) return;
   this._battleTurnOrder.push(BattleManager._subject);
 };
@@ -739,6 +740,7 @@ Game_Temp.prototype.battleTurnOrderAddActionActors = function() {
     if (!battler) continue;
     if (battler.isDead()) continue;
     if (battler.isHidden()) continue;
+    if (battler.isBlock()) continue;
     if (BattleManager._surprise && battler.isActor()) continue;
     if (BattleManager._preemptive && battler.isEnemy()) continue;
     if (battler === BattleManager._subject) continue;
@@ -755,6 +757,7 @@ Game_Temp.prototype.battleTurnOrderAddPerformedActors = function() {
     if (!battler) continue;
     if (battler.isDead()) continue;
     if (battler.isHidden()) continue;
+    if (battler.isBlock()) continue;
     if (BattleManager._surprise && battler.isActor()) continue;
     if (BattleManager._preemptive && battler.isEnemy()) continue;
     if (battler === BattleManager._subject) continue;
@@ -815,6 +818,7 @@ Window_TurnOrderIcon.prototype.setup = function() {
 Window_TurnOrderIcon.prototype.isBattlerVisible = function() {
   var battler = this.battler();
   if (!battler) return false;
+  if (battler.isBlock()) return false;
   if (battler.isDead()) return false;
   if (battler.isHidden()) return false;
   if (battler.friendsUnit().deadMembers().contains(battler)) return false;
@@ -996,7 +1000,9 @@ Window_TurnOrderIcon.prototype.updateDestinationX = function() {
 
 Window_TurnOrderIcon.prototype.aliveMembersSize = function() {
   var value = 0;
-  var members = $gameParty.battleMembers().concat($gameTroop.members());
+  var members = $gameParty.battleMembers().filter(function(member) {
+    return !member.isBlock();
+  }).concat($gameTroop.nonBlockMembers());
   var length = members.length;
   for (var i = 0; i < length; ++i) {
     var member = members[i];
@@ -1045,6 +1051,7 @@ Window_TurnOrderIcon.prototype.calculateDestinationXIndex = function() {
 
 Window_TurnOrderIcon.prototype.turnOrderDisplayIndex = function() {
   var index = 0;
+  console.log(index);
   if (!BattleManager._actionBattlers) return index;
   if (!BattleManager._performedBattlers) return index;
   if (this.battler().isHidden()) return -1;
@@ -1084,7 +1091,7 @@ Window_TurnOrderIcon.prototype.isShiftFirstPossibleIndex = function() {
 
 Window_TurnOrderIcon.prototype.getHiddenBattlers = function() {
   var result = [];
-  var members = $gameParty.battleMembers().concat($gameTroop.members());
+  var members = $gameParty.battleMembers().concat($gameTroop.nonBlockMembers());
   var length = members.length;
   for (var i = 0; i < length; ++i) {
     var member = members[i];
@@ -1103,6 +1110,7 @@ Window_TurnOrderIcon.prototype.getActionBattlers = function() {
     if (!battler) continue;
     if (battler.isDead()) continue;
     if (battler.isHidden()) continue;
+    if (battler.isBlock()) continue;
     if (this._hiddenBattlers.contains(battler)) continue;
     if (BattleManager._performedBattlers.contains(battler)) continue;
     result.push(battler);

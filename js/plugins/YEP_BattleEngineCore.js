@@ -3061,7 +3061,7 @@ Sprite_Actor.prototype.updateShadow = function() {
     if (this._hideShadows === undefined) {
       this._hideShadows = Yanfly.Param.BECShowShadows;
     }
-    if (!this._hideShadows) return this._shadowSprite.visible = false;
+    if (!this._hideShadows || (this._actor && this._actor.isBlock())) return this._shadowSprite.visible = false;
     Yanfly.BEC.Sprite_Actor_updateShadow.call(this);
 };
 
